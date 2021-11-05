@@ -1,36 +1,38 @@
-
+package Server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.Socket;
 
 public class Capitalizer implements Runnable{
 	
 	private PrintWriter socketOut;
 	private BufferedReader socketIn;
+
 	
-	public Capitalizer (BufferedReader socketIn, PrintWriter socketOut) {
-		
-		this.socketIn = socketIn;
-		this.socketOut = socketOut;
-		
+	public Capitalizer (Socket socket) {
+
+		try {
+			socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			socketOut = new PrintWriter(socket.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
 	}
 	
 	private void capitalize () {
 		String line = null;
+		// keep listening to the client
 		while (true) {
 			try {
 				line = socketIn.readLine();
-				if (line.equals("QUIT")){
-					line = "Good Bye!";
-					socketOut.println(line);
-					break;
-				}
 				line = line.toUpperCase();
 				socketOut.println(line);
-				//write code to capitalize the word
-				// write the capitalized word to the socket
-				
+				socketOut.flush(); // must flush so client knows when to stop reading
 			}catch (IOException e) {
 				e.printStackTrace();
 			}
